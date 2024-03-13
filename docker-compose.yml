@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - discovery.type=single-node
+    logging:                          
+      driver: json-file               
+      options:
+        max-size: "10m"               
+        max-file: "3"                 
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ./logstash/config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+      - rabbitmq
+    logging:                          
+      driver: json-file               
+      options:
+        max-size: "10m"               
+        max-file: "3"                 
+
+  rabbitmq:
+    image: rabbitmq:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    logging:                          
+      driver: json-file               
+      options:
+        max-size: "10m"               
+        max-file: "3"                 
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    logging:                          
+      driver: json-file               
+      options:
+        max-size: "10m"               
+        max-file: "3"                 
