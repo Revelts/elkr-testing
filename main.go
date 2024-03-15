@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/streadway/amqp"
 	"log"
+	"time"
+
+	"github.com/streadway/amqp"
 )
 
 func main() {
@@ -22,7 +24,7 @@ func main() {
 
 	q, err := ch.QueueDeclare(
 		"syslog_queue", // Queue name
-		false,          // Durable
+		true,           // Durable
 		false,          // Delete when unused
 		false,          // Exclusive
 		false,          // No-wait
@@ -34,7 +36,8 @@ func main() {
 
 	// Sample data to be indexed
 	data := map[string]interface{}{
-		"message": "Hello, world!",
+		"timestamp": time.Now(),
+		"message":   "Hello, world!",
 	}
 
 	// Marshal data to JSON
